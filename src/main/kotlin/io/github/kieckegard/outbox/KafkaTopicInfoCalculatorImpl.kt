@@ -1,11 +1,21 @@
 package io.github.kieckegard.outbox
 
 import org.springframework.stereotype.Component
+import java.lang.RuntimeException
 
 @Component
-class KafkaTopicInfoCalculatorImpl : KafkaTopicInfoCalculator {
+class KafkaTopicInfoCalculatorImpl(
+        val topicInfoByEventType: Map<Class<*>, DomainEventTopic>
+) : KafkaTopicInfoCalculator {
+
     override fun calculate(event: DomainEvent): KafkaTopicInfoCalculator.KafkaTopicInfo {
-        val topicName = "topic-${event.type}"
-        return KafkaTopicInfoCalculator.KafkaTopicInfo(topicName, 6)
+
+        val result = this.topicInfoByEventType[event::class.java]
+                ?: throw RuntimeException("")
+
+        return KafkaTopicInfoCalculator.KafkaTopicInfo(
+                result.topicName,
+                result.partition
+        );
     }
 }
