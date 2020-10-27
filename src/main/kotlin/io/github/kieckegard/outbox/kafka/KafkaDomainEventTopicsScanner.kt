@@ -1,20 +1,17 @@
-package io.github.kieckegard.outbox
+package io.github.kieckegard.outbox.kafka
 
-import org.springframework.beans.factory.annotation.Qualifier
+import io.github.kieckegard.outbox.ClassScanner
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Scope
-import org.springframework.core.type.filter.AnnotationTypeFilter
 import org.springframework.stereotype.Component
 
 @Configuration
 @Component
-class DomainEventTopicsScanner(
-        @Qualifier("scanner_LOCAL")
-        val scanner: ClassPathScanningCandidateComponentProvider,
+class KafkaDomainEventTopicsScanner(
+        val scanner: ClassScanner,
         @Value("\${kafka.defaultPartitionNumber}")
         val defaultPartitionNumber: Int,
         @Value("\${kafka.defaultTopicNameTemplate}")
@@ -23,25 +20,12 @@ class DomainEventTopicsScanner(
 
     @Bean
     @Scope(BeanDefinition.SCOPE_SINGLETON)
-    fun provideDomainEventTopics(): Map<Class<*>, DomainEventTopic> {
+    fun provideDomainEventTopics(): Map<Class<*>, KafkaDomainEventTopic> {
         return this.scan()
     }
 
-    @Bean("scanner_LOCAL")
-    @Scope(BeanDefinition.SCOPE_SINGLETON)
-    fun provideScanner(): ClassPathScanningCandidateComponentProvider {
-        val scanner = ClassPathScanningCandidateComponentProvider(true)
-        scanner.addIncludeFilter(AnnotationTypeFilter(TopicInfo::class.java))
-        return scanner
-    }
-
-    fun mapToKey(definition: BeanDefinition): Class<*> {
-        return Class.forName(definition.beanClassName)
-    }
-
-    fun mapToValue(definition: BeanDefinition): DomainEventTopic {
-        val clazz = this.mapToKey(definition)
-        val annotation = clazz.getAnnotation(TopicInfo::class.java)
+    fun mapToValue(clazz: Class<*>): KafkaDomainEventTopic {
+        val annotation = clazz.getAnnotation(KafkaTopicInfo::class.java)
 
         var partitionNumber = this.defaultPartitionNumber
         if (annotation.partitionNumber > 0) {
@@ -66,17 +50,17 @@ class DomainEventTopicsScanner(
                     .replace("\$CLASS_NAME", clazz.name)
         }
 
-        return DomainEventTopic(
+        return KafkaDomainEventTopic(
                 topicName,
                 partitionNumber,
                 clazz
         )
     }
 
-    fun scan(): Map<Class<*>, DomainEventTopic> {
-        val candidates = this.scanner.findCandidateComponents("io.github.kieckegard.outbox")
+    fun scan(): Map<Class<*>, KafkaDomainEventTopic> {
+        val candidates = this.scanner.getClassesAnnotatedWith(KafkaTopicInfo::class.java)
         return candidates
-                .map { mapToKey(it) to mapToValue(it) }
+                .map { it to mapToValue(it) }
                 .toMap()
     }
 }

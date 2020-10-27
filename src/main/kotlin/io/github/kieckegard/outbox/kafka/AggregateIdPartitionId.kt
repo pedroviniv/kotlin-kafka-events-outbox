@@ -1,4 +1,4 @@
-package io.github.kieckegard.outbox
+package io.github.kieckegard.outbox.kafka
 
 import javax.persistence.Column
 import javax.persistence.Embeddable

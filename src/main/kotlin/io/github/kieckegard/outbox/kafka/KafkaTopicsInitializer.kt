@@ -1,4 +1,4 @@
-package io.github.kieckegard.outbox
+package io.github.kieckegard.outbox.kafka
 
 import org.apache.kafka.clients.admin.AdminClient
 import org.apache.kafka.clients.admin.NewTopic
@@ -13,10 +13,10 @@ import org.springframework.kafka.core.KafkaAdmin
  */
 @Configuration
 class KafkaTopicsInitializer(
-        val domainEventTopics: Map<Class<*>, DomainEventTopic>
+        val domainEventTopics: Map<Class<*>, KafkaDomainEventTopic>
 ) {
 
-    fun toNewTopic(domainEventTopic: DomainEventTopic): NewTopic {
+    fun toNewTopic(domainEventTopic: KafkaDomainEventTopic): NewTopic {
         return NewTopic(
                 domainEventTopic.topicName,
                 domainEventTopic.partition,

@@ -1,5 +1,6 @@
-package io.github.kieckegard.outbox
+package io.github.kieckegard.outbox.kafka
 
+import io.github.kieckegard.outbox.*
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Component
 

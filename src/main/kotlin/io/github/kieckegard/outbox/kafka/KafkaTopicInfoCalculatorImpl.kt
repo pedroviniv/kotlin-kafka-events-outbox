@@ -1,11 +1,12 @@
-package io.github.kieckegard.outbox
+package io.github.kieckegard.outbox.kafka
 
+import io.github.kieckegard.outbox.DomainEvent
 import org.springframework.stereotype.Component
 import java.lang.RuntimeException
 
 @Component
 class KafkaTopicInfoCalculatorImpl(
-        val topicInfoByEventType: Map<Class<*>, DomainEventTopic>
+        val topicInfoByEventType: Map<Class<*>, KafkaDomainEventTopic>
 ) : KafkaTopicInfoCalculator {
 
     override fun calculate(event: DomainEvent): KafkaTopicInfoCalculator.KafkaTopicInfo {

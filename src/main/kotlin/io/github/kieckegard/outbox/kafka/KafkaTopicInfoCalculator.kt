@@ -1,4 +1,6 @@
-package io.github.kieckegard.outbox
+package io.github.kieckegard.outbox.kafka
+
+import io.github.kieckegard.outbox.DomainEvent
 
 /**
  * calculates|retrieves info about the domainEvent

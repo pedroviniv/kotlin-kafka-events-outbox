@@ -1,5 +1,6 @@
-package io.github.kieckegard.outbox
+package io.github.kieckegard.outbox.kafka
 
+import io.github.kieckegard.outbox.DomainEvent
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import kotlin.random.Random
