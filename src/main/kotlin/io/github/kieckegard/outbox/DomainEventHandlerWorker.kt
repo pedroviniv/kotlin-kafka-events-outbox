@@ -1,5 +1,6 @@
 package io.github.kieckegard.outbox
 
+import io.github.kieckegard.outbox.repository.jpa.DomainEventRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Component
 class DomainEventHandlerWorker(
         val domainEventHandler: DomainEventHandler,
         val domainEventRepository: DomainEventRepository,
-        @Value("\${events.handler.batchSize}") val batchSize: Int
+        @Value("\${events.handler.worker.batchSize}") val batchSize: Int
 ) {
 
     @Scheduled(fixedDelayString = "\${events.handler.worker.fixedDelayInMs}")

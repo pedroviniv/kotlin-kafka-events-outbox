@@ -8,7 +8,18 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
+class KafkaScannedDomainEventTopics(val map: Map<Class<*>, KafkaDomainEventTopic>)
+
 @Configuration
+class Provider(val scanner: KafkaDomainEventTopicsScanner) {
+
+    @Bean
+    @Scope(BeanDefinition.SCOPE_SINGLETON)
+    fun provideScanned(): KafkaScannedDomainEventTopics {
+        return KafkaScannedDomainEventTopics(this.scanner.scan())
+    }
+}
+
 @Component
 class KafkaDomainEventTopicsScanner(
         val scanner: ClassScanner,
@@ -17,12 +28,6 @@ class KafkaDomainEventTopicsScanner(
         @Value("\${kafka.defaultTopicNameTemplate}")
         val defaultTopicNameTemplate: String
 ) {
-
-    @Bean
-    @Scope(BeanDefinition.SCOPE_SINGLETON)
-    fun provideDomainEventTopics(): Map<Class<*>, KafkaDomainEventTopic> {
-        return this.scan()
-    }
 
     fun mapToValue(clazz: Class<*>): KafkaDomainEventTopic {
         val annotation = clazz.getAnnotation(KafkaTopicInfo::class.java)

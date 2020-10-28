@@ -3,17 +3,19 @@ package io.github.kieckegard.outbox
 import java.time.LocalDateTime
 import javax.persistence.*
 
+@Entity
+@Table(name = "t_domain_events")
 open class DomainEvent (
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE)
-        val id: Long?,
+        open var id: Long?,
         @Column(name = "emitted_at")
-        var emittedAt: LocalDateTime?,
+        open var emittedAt: LocalDateTime?,
         @Column(name = "handled_at")
-        var handledAt: LocalDateTime?,
-        val payload: String,
-        val aggregateId : String,
-        val type: String
+        open var handledAt: LocalDateTime?,
+        open var payload: String,
+        open var aggregateId : String,
+        open var type: String
 ) {
 
     @PrePersist

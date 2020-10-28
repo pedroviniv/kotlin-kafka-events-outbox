@@ -1,5 +1,6 @@
 package io.github.kieckegard.outbox
 
+import io.github.kieckegard.outbox.repository.jpa.DomainEventRepository
 import org.springframework.stereotype.Component
 
 @Component

@@ -2,6 +2,7 @@ package io.github.kieckegard.outbox
 
 import org.springframework.context.annotation.*
 import org.springframework.core.type.filter.AnnotationTypeFilter
+import org.springframework.stereotype.Component
 
 /**
  * component that scans classes in the classpath
@@ -9,12 +10,12 @@ import org.springframework.core.type.filter.AnnotationTypeFilter
  *
  * currently supporting scaning classes annotated with a given annotation
  */
-@ComponentScan
+@Component
 class ClassScanner {
 
     fun getClassesAnnotatedWith(annotation: Class<out Annotation>): List<Class<*>> {
 
-        val scanner = ClassPathScanningCandidateComponentProvider(true)
+        val scanner = ClassPathScanningCandidateComponentProvider(false)
         scanner.addIncludeFilter(AnnotationTypeFilter(annotation))
 
         val candidates = scanner

@@ -1,6 +1,7 @@
 package io.github.kieckegard.outbox.kafka
 
 import io.github.kieckegard.outbox.*
+import io.github.kieckegard.outbox.repository.jpa.DomainEventRepository
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Component
 
@@ -8,13 +9,11 @@ import org.springframework.stereotype.Component
 class KafkaDomainEventHandler(
         eventRepository: DomainEventRepository,
         val kafkaTemplate: KafkaTemplate<String, String>,
-        val partitionIdCalculator: PartitionIdCalculator,
         val kafkaTopicInfoCalculator: KafkaTopicInfoCalculator) : PersistentDomainEventHandler(eventRepository) {
 
     override fun doHandle(event: DomainEvent) {
         val topicInfo = this.kafkaTopicInfoCalculator.calculate(event)
-        val partition = this.partitionIdCalculator.calculate(event, topicInfo.partitionsNumber)
-        this.kafkaTemplate.send(topicInfo.topicName, partition, event.aggregateId, event.payload)
+        this.kafkaTemplate.send(topicInfo.topicName, event.aggregateId, event.payload)
     }
 
 }
