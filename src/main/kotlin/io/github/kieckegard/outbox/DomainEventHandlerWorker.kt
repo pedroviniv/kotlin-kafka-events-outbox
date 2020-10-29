@@ -1,6 +1,7 @@
 package io.github.kieckegard.outbox
 
-import io.github.kieckegard.outbox.repository.jpa.DomainEventRepository
+import io.github.kieckegard.outbox.storage.DomainEventStorage
+import io.github.kieckegard.outbox.storage.jpa.JpaDomainEventRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Component
 @Component
 class DomainEventHandlerWorker(
         val domainEventHandler: DomainEventHandler,
-        val domainEventRepository: DomainEventRepository,
+        val eventStorage: DomainEventStorage,
         @Value("\${events.handler.worker.batchSize}") val batchSize: Int
 ) {
 
@@ -31,8 +32,11 @@ class DomainEventHandlerWorker(
          * because our consumers should be idempotent.
          */
 
-        this.domainEventRepository.findAllByHandledAtIsNull(this.batchSize)
-                .forEach(this.domainEventHandler::handle)
+        this.eventStorage.getUnhandledEvents(this.batchSize)
+                .forEach {
+                    println("handling event ${it.id} of type ${it.type}, with aggregate id ${it.aggregateId}")
+                    this.domainEventHandler.handle(it)
+                }
     }
 
 }

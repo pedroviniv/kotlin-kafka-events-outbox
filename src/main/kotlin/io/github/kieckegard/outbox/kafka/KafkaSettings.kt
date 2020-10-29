@@ -6,5 +6,7 @@ import org.springframework.stereotype.Component
 @Component
 class KafkaSettings(
         @Value("\${kafka.broker.address}")
-        val bootstrapServer: String
+        val bootstrapServer: String,
+        @Value("\${kafka.operationTimeout}")
+        val operationTimeout: Long
 )

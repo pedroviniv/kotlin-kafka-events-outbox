@@ -8,7 +8,7 @@ import javax.persistence.*
 class Product(
         @Id
         @GeneratedValue(strategy = GenerationType.SEQUENCE)
-        val id: Long,
+        val id: Long?,
         val title: String,
         val price: BigDecimal
 )

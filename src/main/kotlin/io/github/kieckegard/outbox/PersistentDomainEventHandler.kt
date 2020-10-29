@@ -1,9 +1,10 @@
 package io.github.kieckegard.outbox
 
-import io.github.kieckegard.outbox.repository.jpa.DomainEventRepository
+import io.github.kieckegard.outbox.storage.DomainEventStorage
+import io.github.kieckegard.outbox.storage.jpa.JpaDomainEventRepository
 import org.springframework.transaction.annotation.Transactional
 
-abstract class PersistentDomainEventHandler(private val eventRepository: DomainEventRepository)
+abstract class PersistentDomainEventHandler(private val eventStorage: DomainEventStorage)
     : DomainEventHandler {
 
     abstract fun doHandle(event: DomainEvent);
@@ -13,7 +14,7 @@ abstract class PersistentDomainEventHandler(private val eventRepository: DomainE
         try {
             this.doHandle(event)
             event.handle()
-            this.eventRepository.save(event)
+            this.eventStorage.update(event)
         } catch (ex: Throwable) {
             /**
              * If some error occurs while "do handling", the event will not be

@@ -29,31 +29,48 @@ class KafkaDomainEventTopicsScanner(
         val defaultTopicNameTemplate: String
 ) {
 
+    fun isATemplate(text: String): Boolean {
+        return text.contains("\$")
+    }
+
+    fun compile(template: String, clazz: Class<*>): String {
+        return template.replace("\$CLASS_NAME", clazz.name)
+    }
+
+    /**
+     * gets the topic name
+     */
+    fun getTopicName(annotation: KafkaTopicInfo, clazz: Class<*>): String {
+        if (annotation.topicName.isEmpty()) {
+
+            if (this.defaultTopicNameTemplate == null) {
+                return clazz.name
+            } else if (this.isATemplate(this.defaultTopicNameTemplate)) {
+                return this.compile(this.defaultTopicNameTemplate, clazz)
+            }
+        }
+
+        if (this.isATemplate(annotation.topicName)) {
+            return this.compile(annotation.topicName, clazz)
+        }
+
+        return annotation.topicName
+    }
+
+    fun getPartitionNumber(annotation: KafkaTopicInfo): Int {
+
+        if (annotation.partitionNumber < 1) {
+            return this.defaultPartitionNumber
+        }
+
+        return annotation.partitionNumber
+    }
+
     fun mapToValue(clazz: Class<*>): KafkaDomainEventTopic {
         val annotation = clazz.getAnnotation(KafkaTopicInfo::class.java)
 
-        var partitionNumber = this.defaultPartitionNumber
-        if (annotation.partitionNumber > 0) {
-            partitionNumber = annotation.partitionNumber
-        }
-
-        var topicName = annotation.topicName
-        if (annotation.topicName.isEmpty()) {
-
-            // using default topic naming behaviour
-            if (this.defaultTopicNameTemplate == null) {
-                topicName = clazz.name
-            } else if (this.defaultTopicNameTemplate.contains("\$")) { // has variables
-                topicName = this.defaultTopicNameTemplate
-                        .replace("\$CLASS_NAME", clazz.name)
-            }
-        }
-        // using template defined topic name
-        else if (annotation.topicName
-                .contains("\$")) { // has variables
-            topicName = annotation.topicName
-                    .replace("\$CLASS_NAME", clazz.name)
-        }
+        val partitionNumber = this.getPartitionNumber(annotation)
+        val topicName = this.getTopicName(annotation, clazz)
 
         return KafkaDomainEventTopic(
                 topicName,
@@ -64,8 +81,10 @@ class KafkaDomainEventTopicsScanner(
 
     fun scan(): Map<Class<*>, KafkaDomainEventTopic> {
         val candidates = this.scanner.getClassesAnnotatedWith(KafkaTopicInfo::class.java)
-        return candidates
+        val asMap = candidates
                 .map { it to mapToValue(it) }
                 .toMap()
+
+        return asMap
     }
 }

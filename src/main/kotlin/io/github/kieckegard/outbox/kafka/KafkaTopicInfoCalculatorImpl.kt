@@ -11,7 +11,9 @@ class KafkaTopicInfoCalculatorImpl(
 
     override fun calculate(event: DomainEvent): KafkaTopicInfoCalculator.KafkaTopicInfo {
 
-        val result = this.scanned.map[event::class.java]
+        val type = Class.forName(event.type)
+
+        val result = this.scanned.map[type]
                 ?: throw RuntimeException("")
 
         return KafkaTopicInfoCalculator.KafkaTopicInfo(

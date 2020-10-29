@@ -1,27 +1,34 @@
 package io.github.kieckegard.outbox
 
 import java.time.LocalDateTime
-import javax.persistence.*
 
-@Entity
-@Table(name = "t_domain_events")
+/**
+ * primary constructor that which type
+ * is retrieved automatically in runtime
+ */
 open class DomainEvent (
-        @Id
-        @GeneratedValue(strategy = GenerationType.SEQUENCE)
-        open var id: Long?,
-        @Column(name = "emitted_at")
-        open var emittedAt: LocalDateTime?,
-        @Column(name = "handled_at")
-        open var handledAt: LocalDateTime?,
-        open var payload: String,
-        open var aggregateId : String,
-        open var type: String
+        var id: Long?,
+        val emittedAt: LocalDateTime? = LocalDateTime.now(),
+        var handledAt: LocalDateTime?,
+        val payload: String,
+        val aggregateId : String
 ) {
 
-    @PrePersist
-    fun prePersist() {
-        this.emittedAt = LocalDateTime.now();
+    /**
+     * secondary constructor that takes a type
+     *
+     * it is used to create a full customizable DomainEvent
+     */
+    constructor(id: Long?,
+                emittedAt: LocalDateTime? = LocalDateTime.now(),
+                handledAt: LocalDateTime?,
+                payload: String,
+                aggregateId : String,
+                type: String) : this(id, emittedAt, handledAt, payload, aggregateId){
+        this.type = type
     }
+
+    var type: String = this::class.java.name;
 
     fun handle() {
         this.handledAt = LocalDateTime.now();
