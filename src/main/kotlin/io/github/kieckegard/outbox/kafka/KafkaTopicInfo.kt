@@ -20,5 +20,5 @@ package io.github.kieckegard.outbox.kafka
 @Retention(AnnotationRetention.RUNTIME)
 annotation class KafkaTopicInfo(
         val topicName: String = "",
-        val partitionNumber: Int = -1
+        val type: String = ""
 )

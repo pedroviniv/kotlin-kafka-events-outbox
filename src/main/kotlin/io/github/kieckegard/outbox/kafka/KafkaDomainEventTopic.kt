@@ -2,6 +2,5 @@ package io.github.kieckegard.outbox.kafka
 
 class KafkaDomainEventTopic(
         val topicName: String,
-        val partition: Int,
-        val target: Class<*>
+        val partition: Int
 )

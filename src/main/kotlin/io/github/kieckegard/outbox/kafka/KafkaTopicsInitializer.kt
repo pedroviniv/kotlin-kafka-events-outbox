@@ -56,6 +56,7 @@ class KafkaTopicsInitializer(
 
         return this.scanned.map
                 .values
+                .distinctBy { it.topicName }
                 .map { this.toNewTopic(it) }
                 .toList()
     }

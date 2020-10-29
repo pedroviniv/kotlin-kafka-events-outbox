@@ -6,6 +6,7 @@ import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Scope
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Component
 
 class KafkaScannedDomainEventTopics(val map: Map<Class<*>, KafkaDomainEventTopic>)
@@ -26,7 +27,8 @@ class KafkaDomainEventTopicsScanner(
         @Value("\${kafka.defaultPartitionNumber}")
         val defaultPartitionNumber: Int,
         @Value("\${kafka.defaultTopicNameTemplate}")
-        val defaultTopicNameTemplate: String
+        val defaultTopicNameTemplate: String,
+        val environment: Environment
 ) {
 
     fun isATemplate(text: String): Boolean {
@@ -57,34 +59,39 @@ class KafkaDomainEventTopicsScanner(
         return annotation.topicName
     }
 
-    fun getPartitionNumber(annotation: KafkaTopicInfo): Int {
+    fun getPartitionNumber(annotation: KafkaTopicInfo, mountedTopicName: String): Int {
 
-        if (annotation.partitionNumber < 1) {
+        val propKey = "kafka.topics.${mountedTopicName}.partitionNumber"
+        val partitionNumberStr = this.environment.getProperty(propKey)
+        if (partitionNumberStr.isNullOrEmpty()) {
             return this.defaultPartitionNumber
         }
 
-        return annotation.partitionNumber
+        try {
+            return partitionNumberStr.toInt()
+        } catch (e: NumberFormatException) {
+            println("The property ${propKey} does not have a Integer as a value, so we're using the defaultPartitionNumber")
+            return this.defaultPartitionNumber
+        }
     }
 
     fun mapToValue(clazz: Class<*>): KafkaDomainEventTopic {
         val annotation = clazz.getAnnotation(KafkaTopicInfo::class.java)
 
-        val partitionNumber = this.getPartitionNumber(annotation)
         val topicName = this.getTopicName(annotation, clazz)
+        val partitionNumber = this.getPartitionNumber(annotation, topicName)
 
         return KafkaDomainEventTopic(
                 topicName,
-                partitionNumber,
-                clazz
+                partitionNumber
         )
     }
 
     fun scan(): Map<Class<*>, KafkaDomainEventTopic> {
         val candidates = this.scanner.getClassesAnnotatedWith(KafkaTopicInfo::class.java)
-        val asMap = candidates
+
+        return candidates
                 .map { it to mapToValue(it) }
                 .toMap()
-
-        return asMap
     }
 }
