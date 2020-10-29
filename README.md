@@ -43,6 +43,14 @@ kafka.topics.PRODUCTS.partitionNumber=3
 # property to configure the kafka broker address
 # address of your kafka broker
 kafka.broker.address=localhost:9092
+
+# ALSO you should configure the RDMS the application will use to store the events
+spring.datasource.url=jdbc:postgresql://localhost:5432/<YOUR_DB_NAME>
+spring.datasource.username=<YOUR_USERNAME>
+spring.datasource.password=<YOUR_PASSWORD>
+spring.datasource.driver-class-name=org.postgresql.Driver #or other driver, here it's using postgresql because the project already has the driver jar
+spring.jpa.generate-ddl=true
+spring.jpa.hibernate.ddl-auto=create
 ```
 
 It's worth to mention that a DomainEvent has a aggregateId property because, inside a topic, all events
